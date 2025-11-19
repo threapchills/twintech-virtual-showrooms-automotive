@@ -54,8 +54,8 @@
         const IconChevronDown = ({ size = 24, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6 9 6 6 6-6"/></svg>
         );
-        const IconScan = ({ size = 24, className = "" }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+        const IconDownload = ({ size = 24, className = "" }) => (
+             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         );
 
         // --- ASSETS ---
@@ -65,19 +65,21 @@
             image1: './images/ev1.png',
             image2: './images/ev2.png',
             image3: './images/evinterior.png',
+            imageNew: './images/ev3.png', // The new ev3 image
+            proposalPdf: './eastvaal-twintech-proposal-Nov2025.pdf'
         };
 
         const FALLBACKS = {
-            logo: 'https://placehold.co/400x100/FFFFFF/000000/png?text=EASTVAAL+MOTORS', // Inverted for light mode
+            logo: 'https://placehold.co/400x100/FFFFFF/000000/png?text=EASTVAAL+MOTORS', 
             twintechLogo: 'https://placehold.co/200x80/FFFFFF/0ea5e9/png?text=TWINTECH',
             image1: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070&auto=format&fit=crop',
             image2: 'https://images.unsplash.com/photo-1562911791-c7a97b729ec5?q=80&w=2787&auto=format&fit=crop',
             image3: 'https://images.unsplash.com/photo-1542362567-b07e54358753?q=80&w=2070&auto=format&fit=crop',
+            imageNew: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=2070&auto=format&fit=crop',
         };
 
         // --- COMPONENTS ---
 
-        // Adjusted for Light Mode (Darker Chrome effect)
         const LiquidMetal = ({ children, className = "", size = "text-5xl" }) => {
             return (
                 <div className={`relative inline-block font-black uppercase tracking-tighter ${className}`}>
@@ -87,7 +89,6 @@
                         <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
                         </filter>
                     </svg>
-                    {/* Darker gradient for visibility on white background */}
                     <h2 
                         className={`${size} bg-clip-text text-transparent bg-gradient-to-b from-slate-600 via-slate-900 to-slate-700 relative z-10`}
                         style={{
@@ -99,44 +100,6 @@
                     >
                         {children}
                     </h2>
-                </div>
-            );
-        };
-
-        const PanoramaViewer = ({ src, alt }) => {
-            const containerRef = useRef(null);
-            const [offset, setOffset] = useState(50);
-
-            const handleMouseMove = (e) => {
-                if (!containerRef.current) return;
-                const { left, width } = containerRef.current.getBoundingClientRect();
-                const x = e.clientX - left;
-                const percentage = (x / width) * 100;
-                setOffset(percentage);
-            };
-
-            return (
-                // Full width container
-                <div className="w-full h-[600px] overflow-hidden relative group border-y-4 border-slate-200">
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur text-slate-900 px-6 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg">
-                        <IconScan size={18} /> Interactive Viewport
-                    </div>
-                    <div 
-                        ref={containerRef}
-                        onMouseMove={handleMouseMove}
-                        className="h-full w-full cursor-ew-resize relative bg-slate-200"
-                    >
-                        <img 
-                            src={src} 
-                            alt={alt}
-                            className="absolute h-full max-w-none object-cover transition-transform duration-75 ease-linear"
-                            style={{ 
-                                left: '50%',
-                                transform: `translateX(calc(-${offset}%))` // Center pivot
-                            }}
-                            onError={(e) => e.target.src = FALLBACKS.image2}
-                        />
-                    </div>
                 </div>
             );
         };
@@ -170,26 +133,35 @@
         // --- MAIN APP ---
 
         const App = () => {
-            const [activeModal, setActiveModal] = useState(null);
+            const [activeModal, setActiveModal] = useState(null); // 'left', 'right', 'center'
+            
+            // URL Configs
+            const urlDiscovery = "https://discover.matterport.com/space/HTXzWg6BPFb";
+            const urlVirtualTour = "https://my.matterport.com/show?play=1&lang=en-US&m=dpBNKCc1tnb";
+            const urlCentral = "https://my.matterport.com/show?play=1&lang=en-US&m=4YW9euVmSn2";
+
+            const getActiveUrl = () => {
+                switch(activeModal) {
+                    case 'left': return urlDiscovery;
+                    case 'right': return urlVirtualTour;
+                    case 'center': return urlCentral;
+                    default: return "";
+                }
+            };
 
             return (
                 <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-cyan-200 selection:text-cyan-900 overflow-x-hidden">
                 
                     {/* Modal Layer */}
                     <MatterportModal 
-                        isOpen={activeModal === 'left'} 
-                        url="https://my.matterport.com/show?play=1&lang=en-US&m=HTXzWg6BPFb" 
-                        onClose={() => setActiveModal(null)} 
-                    />
-                    <MatterportModal 
-                        isOpen={activeModal === 'right'} 
-                        url="https://my.matterport.com/show?play=1&lang=en-US&m=dpBNKCc1tnb" 
+                        isOpen={!!activeModal} 
+                        url={getActiveUrl()} 
                         onClose={() => setActiveModal(null)} 
                     />
 
-                    {/* --- HERO SECTION --- */}
-                    <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-4 pt-20">
-                        {/* Subtle Grid Background for Light Mode */}
+                    {/* --- HERO HEADER SECTION --- */}
+                    <section className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-20 pb-12">
+                        {/* Background FX */}
                         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10"></div>
                         
                         <div className="mb-8 animate-fade-in-down">
@@ -204,22 +176,48 @@
                         <LiquidMetal size="text-6xl md:text-9xl">
                         The Retail<br />Twin Revolution
                         </LiquidMetal>
+                    </section>
 
-                        <div className="mt-12 max-w-3xl mx-auto space-y-6">
-                            <p className="text-xl md:text-3xl text-slate-600 font-light leading-relaxed">
-                                <span className="text-cyan-600 font-bold">28 Brands.</span> One Immersive Hub. <br/>
-                                Your Showroom. Everywhere.
+                    {/* --- SECTION 1: EV3 + CENTRAL LINK --- */}
+                    <section className="py-12 w-full">
+                        <div className="text-center mb-8 px-4">
+                            <p className="text-xl md:text-3xl text-slate-600 font-light leading-relaxed mb-4">
+                                <span className="text-cyan-600 font-bold">28 Brands.</span> One Immersive Hub.
                             </p>
-                            <div className="flex justify-center pt-12">
-                                <IconChevronDown className="animate-bounce text-slate-400" size={40} />
+                            <IconChevronDown className="animate-bounce text-slate-400 mx-auto" size={32} />
+                        </div>
+
+                        <div className="w-full relative group overflow-hidden">
+                            <img 
+                                src={ASSETS.imageNew} 
+                                onError={(e) => e.target.src = FALLBACKS.imageNew}
+                                alt="Eastvaal Hub" 
+                                className="w-full h-auto min-h-[500px] object-cover transition-transform duration-1000"
+                            />
+                            
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
+
+                            {/* Central Arrow */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                                <button 
+                                    onClick={() => setActiveModal('center')}
+                                    className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center hover:bg-cyan-600 hover:border-cyan-500 hover:scale-110 transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.4)] group/btn"
+                                >
+                                    <IconArrowRight size={40} className="text-white group-hover/btn:text-white" />
+                                </button>
+                                <div className="mt-4 text-center">
+                                    <span className="bg-black/60 text-white px-3 py-1 rounded text-xs uppercase tracking-widest backdrop-blur-sm">Enter Hub</span>
+                                </div>
                             </div>
                         </div>
                     </section>
 
-                    {/* --- THE FORK (Image 1 - Full Width) --- */}
-                    <section className="py-12 w-full">
+                    {/* --- SECTION 2: EV1 + DUAL LINKS --- */}
+                    <section className="py-12 w-full bg-white">
                         <div className="text-center mb-8 px-4">
-                            <h3 className="text-3xl font-bold text-slate-800 mb-2">Select Your Journey</h3>
+                            <h3 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">Your Showroom. Everywhere.</h3>
+                            <p className="text-slate-500 text-lg">Customize and update stock freely.</p>
                         </div>
 
                         <div className="w-full relative group overflow-hidden">
@@ -230,10 +228,9 @@
                                 className="w-full h-auto min-h-[500px] object-cover transition-transform duration-1000"
                             />
                             
-                            {/* Overlay for better button visibility */}
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-500"></div>
 
-                            {/* Left Arrow (Subtle) */}
+                            {/* Left Arrow */}
                             <div className="absolute top-1/2 left-[15%] md:left-[20%] -translate-y-1/2 z-20">
                                 <button 
                                     onClick={() => setActiveModal('left')}
@@ -243,7 +240,7 @@
                                 </button>
                             </div>
 
-                            {/* Right Arrow (Subtle) */}
+                            {/* Right Arrow */}
                             <div className="absolute top-1/2 right-[15%] md:right-[20%] -translate-y-1/2 z-20">
                                 <button 
                                     onClick={() => setActiveModal('right')}
@@ -255,30 +252,34 @@
                         </div>
                     </section>
 
-                    {/* --- PANORAMA SECTION (Image 2 - Full Screen Width) --- */}
-                    <section className="py-20 bg-white">
+                    {/* --- SECTION 3: EV2 STATIC (NO PANORAMA) --- */}
+                    <section className="py-20 bg-slate-50">
                         <div className="text-center mb-10 px-4">
                             <LiquidMetal size="text-4xl md:text-7xl">
                                 Digital Floor.<br />Infinite Views.
                             </LiquidMetal>
-                            <p className="mt-6 text-lg text-slate-500 max-w-2xl mx-auto">
-                                Why build walls when you can build worlds?
-                            </p>
                         </div>
 
-                        {/* Full Width Panorama */}
-                        <PanoramaViewer src={ASSETS.image2} alt="Showroom Panorama" />
+                        {/* Full Width Static Image (No Viewport Logic) */}
+                        <div className="w-full h-[500px] md:h-[700px] overflow-hidden relative border-y-4 border-slate-200">
+                             <img 
+                                src={ASSETS.image2} 
+                                onError={(e) => e.target.src = FALLBACKS.image2}
+                                alt="Static Panorama View" 
+                                className="w-full h-full object-cover object-center"
+                            />
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 mt-16 text-center">
-                            <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                            <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
                                 <h4 className="text-cyan-600 font-bold text-xl mb-2">Skyrocket Sales</h4>
                                 <p className="text-sm text-slate-500">20–40% rise in lead conversion.</p>
                             </div>
-                            <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                            <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
                                 <h4 className="text-cyan-600 font-bold text-xl mb-2">Total Transparency</h4>
                                 <p className="text-sm text-slate-500">360° scans kill buyer hesitation.</p>
                             </div>
-                            <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                            <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition-all">
                                 <h4 className="text-cyan-600 font-bold text-xl mb-2">Google Dominance</h4>
                                 <p className="text-sm text-slate-500">SEO gold. Be seen everywhere.</p>
                             </div>
@@ -286,8 +287,7 @@
                     </section>
 
                     {/* --- INTERIOR SECTION (Image 3 - Framed + Full) --- */}
-                    <section className="py-20 px-4 bg-slate-50">
-                        {/* 1. The Story & Framed Image */}
+                    <section className="py-20 px-4 bg-white">
                         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
                             <div className="space-y-8">
                                 <h2 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
@@ -320,7 +320,7 @@
                             </div>
                         </div>
 
-                        {/* 2. The FULL WIDTH Cinematic Shot */}
+                        {/* Full Width Cinematic Shot */}
                         <div className="w-full max-w-[100vw] overflow-hidden relative mt-12">
                              <div className="absolute top-8 left-8 bg-white/90 backdrop-blur px-4 py-2 rounded text-sm font-bold text-slate-900 z-10 shadow-lg">
                                 Driver's Perspective
@@ -335,7 +335,7 @@
                     </section>
 
                     {/* --- FOOTER --- */}
-                    <footer className="py-24 text-center relative bg-white overflow-hidden border-t border-slate-200">
+                    <footer className="py-24 text-center relative bg-slate-50 overflow-hidden border-t border-slate-200">
                         <div className="max-w-3xl mx-auto px-4 relative z-10">
                             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-8">
                             Ready to Future-Proof Eastvaal?
@@ -346,12 +346,15 @@
                             </p>
 
                             <div className="mb-20">
-                            <button 
-                                onClick={() => window.location.href='mailto:mike@twintech.co.za'}
-                                className="px-8 py-4 bg-slate-900 text-white font-bold uppercase tracking-widest rounded hover:bg-cyan-600 hover:scale-105 transition-all duration-300 shadow-xl"
-                            >
-                                Initiate Launch
-                            </button>
+                                <a 
+                                    href={ASSETS.proposalPdf} 
+                                    target="_blank"
+                                    download="Eastvaal_Twintech_Proposal_Nov2025"
+                                    className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900 text-white font-bold uppercase tracking-widest rounded hover:bg-cyan-600 hover:scale-105 transition-all duration-300 shadow-xl"
+                                >
+                                    <IconDownload size={20} />
+                                    Download Proposal
+                                </a>
                             </div>
 
                             <div className="flex flex-col items-center justify-center gap-6 opacity-60 hover:opacity-100 transition-opacity">
